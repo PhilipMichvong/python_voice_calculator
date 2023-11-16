@@ -1,8 +1,5 @@
 import speech_recognition as sr
 import pyttsx3
-import subprocess
-import time
-import os
 
 
 class Recognizer:
@@ -16,8 +13,6 @@ class Recognizer:
                 actions = ["dodawanie", "odejmowanie", "mnożenie", "dzielenie"]
                 self.speak_in_polish(
                     f"wybierz jedną z akcji: {actions} lub pomoc - aby uzyskac pomoc")
-                print(
-                    f"wybierz jedną z akcji: {actions} lub pomoc - aby uzyskac pomoc")
 
                 while True:
                     audio = recognizer.listen(source, timeout=3)
@@ -28,46 +23,39 @@ class Recognizer:
                     if action == "pomoc":
                         self.print_help()
                         continue  # Wróć do oczekiwania na komendę
+                    if action == "koniec":
+                        return 0
 
-                    self.speak_in_polish(f"Wybrana akcja: {action}")
                     print(f"Wybrana akcja: {action}")
 
                     if action not in actions:
-                        self.speak_in_polish(
-                            f"Nie rozpoznano poprawnie, wybierz jedną z akcji: {actions}")
                         print(
                             f"Nie rozpoznano poprawnie, wybierz jedną z akcji: {actions}")
                         continue  # Wróć do oczekiwania na poprawną komendę
 
                     self.speak_in_polish("Podaj pierwszą liczbę")
-                    print("Podaj pierwszą liczbę")
-                    audio = recognizer.listen(source, timeout=3)
+                    audio = recognizer.listen(source, timeout=5)
                     num1 = self.parse_number(
                         recognizer.recognize_google(audio, language='pl-PL'))
-
                     if num1 is not None:
                         print(f"Pierwsza liczba: {num1}")
                         self.speak_in_polish("Podaj drugą liczbę")
-                        print("Podaj drugą liczbę")
-                        audio = recognizer.listen(source, timeout=3)
+                        audio = recognizer.listen(source, timeout=5)
                         num2 = self.parse_number(
                             recognizer.recognize_google(audio, language='pl-PL'))
 
-                        if num2 is not None:
-                            print(f"Druga liczba: {num2}")
-                            result = self.perform_operation(action, num1, num2)
+                    if num2 is not None:
+                        print(f"Druga liczba: {num2}")
+                        result = self.perform_operation(action, num1, num2)
+                        if result is not None:
+                            self.speak_in_polish(f"Wynik: {result}")
+                    else:
+                        print("Nie rozpoznano drugiej liczby poprawnie.")
 
-                            if result is not None:
-                                result_text = f"Wynik: {result}"
-                                self.speak_in_polish(result_text)
-                                print(result_text)
-                                self.play_audio(result_text)
-                        else:
-                            print("Nie rozpoznano drugiej liczby poprawnie.")
             except sr.WaitTimeoutError:
-                print("Czas na nagranie minął. Spróbuj ponownie.")
+                print("Czas na nagranie liczb minął. Spróbuj ponownie.")
             except sr.UnknownValueError:
-                print("Nie udało się rozpoznać mowy.")
+                print("Nie udało się rozpoznać mowy (liczby).")
             except sr.RequestError as e:
                 print(f"Nie udało się obsłużyć zapytania, błąd: {e}")
 
@@ -75,10 +63,9 @@ class Recognizer:
         try:
             # Zamień ewentualny przecinek na kropkę
             return float(text.replace(",", "."))
-
         except ValueError:
             try:
-                return float(self.polish_word_to_number(text))
+                return self.polish_word_to_number(text)
             except ValueError:
                 print(f"Nie udało się zinterpretować liczby: {text}")
                 return None
@@ -99,17 +86,19 @@ class Recognizer:
         return numbers_dict.get(word, None)
 
     def perform_operation(self, action, num1, num2):
-        if action == "dodawanie" or "dodawania":
+        if action in ['dodawanie', 'dodawania']:
             return num1 + num2
-        elif action == "odejmowanie" or action == "odejmowania":
+        elif action in ["odejmowanie", 'odejmowania']:
             return num1 - num2
-        elif action == "mnożenie" or action == "mnożenia":
+        elif action in ["mnożenie", "mnożenia"]:
             return num1 * num2
-        elif action == "dzielenie" or action == "dzielenia":
+        elif action in ["dzielenie", "dzielenia"]:
             if num2 == 0:
                 print("Nie można dzielić przez zero!")
                 return None
             return num1 / num2
+        elif action == "koniec":
+            return 1
 
     def print_help(self):
         print("Komendy dostępne w programie:")
@@ -121,25 +110,11 @@ class Recognizer:
 
     def speak_in_polish(self, text):
         engine = pyttsx3.init()
-
         engine.setProperty('rate', 150)
         engine.setProperty('voice', 'pl')
-
         engine.say(text)
         engine.runAndWait()
-
-    def play_audio(self, text):
-        # Zapisz mowę do pliku
-        engine = pyttsx3.init()
-        engine.save_to_file(text, 'output.mp3')
-        engine.runAndWait()
-
-        # Odtwórz plik dźwiękowy
-        subprocess.run(['start', 'output.mp3'], shell=True)
-        time.sleep(5)  # Czekaj na zakończenie odtwarzania
-
-        # Usuń plik po zakończeniu
-        os.remove('output.mp3')
+        print(text)
 
 
 def main():

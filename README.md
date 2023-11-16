@@ -18,7 +18,6 @@ Utwórz wirtualne środowisko, aby izolować zależności projektu. Możesz uży
 
 ```bash
 python -m venv venv
-
 ```
 
 ## Krok 3: Aktywuj wirtualne środowisko:
@@ -44,7 +43,7 @@ Użyj pliku requirements.txt, aby zainstalować wszystkie niezbędne zależnośc
 pip install -r requirements.txt
 ```
 
-## Krok 4: Uruchom projekt
+## Krok 5: Uruchom projekt
 
 Teraz możesz uruchomić swój projekt. Upewnij się, że wirtualne środowisko jest aktywowane, a następnie:
 
@@ -55,3 +54,7 @@ python main.py
 To wszystko! Teraz powinieneś mieć projekt uruchomiony z izolowanymi zależnościami w wirtualnym środowisku.
 
 Upewnij się, że zmienisz `https://adres_repozytorium.git` i `nazwa_projektu` na odpowiedni
+
+## Przykład działania :
+
+![przykład użycia](example.png)
