@@ -37,6 +37,7 @@ class Recognizer:
                     audio = recognizer.listen(source, timeout=5)
                     num1 = self.parse_number(
                         recognizer.recognize_google(audio, language='pl-PL'))
+                    num2 = None
                     if num1 is not None:
                         print(f"Pierwsza liczba: {num1}")
                         self.speak_in_polish("Podaj drugą liczbę")
